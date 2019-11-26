@@ -16,6 +16,7 @@ class AutoCompleter:
     def __init__(self, dictionary):
         self.sentence = ''
         self.min_autocomplete = 2
+        self.default_encode = 'utf-8'
         self.word_list = dictionary
         self.clear_screen = False
 
@@ -27,14 +28,12 @@ class AutoCompleter:
     def initializeInputMethod(self):
         try:  # for Windows
             import msvcrt
-
             def _get_key():
-                return msvcrt.getch()
-        except ImportError:  # Linux / testme
+                return msvcrt.getwch()
+        except ImportError:  # Linux 
             import tty
             import sys
             import termios
-
             def _get_key():
                 fd = sys.stdin.fileno()
                 old_settings = termios.tcgetattr(fd)
@@ -42,7 +41,7 @@ class AutoCompleter:
                     tty.setraw(sys.stdin.fileno())
                     input_char = sys.stdin.read(1)
                 finally:
-                    termios.tcsetattr(fd, terminos.TCSADRAIN, old_settings)
+                    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
                 return input_char
         self._get_key = _get_key  # _get_key() for get key
 
@@ -77,17 +76,11 @@ class AutoCompleter:
     def backSpace(self):
         self.sentence = self.sentence[:-1]
 
+    def toBytes(self, char):
+        return bytes(char, encoding=self.default_encode)
+
     def decodeChar(self, char):
-        encode_table = {
-            b'\xa4': 'ñ',
-            b'\xa0': 'á',
-            b'\xa1': 'í',
-            b'\xa2': 'ó',
-            b'\x82': 'é'
-        }  # fixme!
-        if(char in encode_table):
-            return encode_table[char]
-        return str(char, 'utf-8', 'ignore')
+        return char
 
     def __call__(self):
         self.initializeInputMethod()
@@ -98,14 +91,14 @@ class AutoCompleter:
         while True:
             input_char = self._get_key()
             last_word = self.getLastWord()
-            if input_char == b'\r':
+            if self.toBytes(input_char) == b'\r':
                 break
-            elif input_char == b'\t' and candidates:  # tab key- alternate mode
+            elif self.toBytes(input_char) == b'\t' and candidates:  # tab key
                 if len(candidates) > 1:  # more of 1 sugerences
                     candidates.insert(0, candidates.pop(
                         candidates.index(candidates[-1])))
-                    self.replaceLastWord(candidates[1])
-            elif input_char == b'\x08':  # backspace
+                    self.replaceLastWord(candidates[1])  # alternate sugerence
+            elif self.toBytes(input_char) == b'\x08':  # backspace
                 if word_cache:
                     self.replaceLastWord(word_cache)  # restore previous input
                     word_cache = ''  # clear cache
@@ -113,7 +106,7 @@ class AutoCompleter:
                 else:
                     self.backSpace()
             else:
-                if input_char is b' ':  # space key
+                if self.toBytes(input_char) is b' ':  # space key
                     self.sentence += ' '
                     word_cache = ''
                     auto_complete = True
