@@ -3,8 +3,6 @@ import sys
 
 __autor__ = 'srbill1996'
 
-AUTO_CLEAR_SCREEN = True
-
 class RedirectStdout():
     stdout = sys.stdout
     stdout_log = []
@@ -12,8 +10,6 @@ class RedirectStdout():
         sys.stdout = self
     
     def stop(self):
-        if AUTO_CLEAR_SCREEN:
-            os.system("clear")
         sys.stdout = self.stdout
         print("".join([i for i in self.stdout_log]))
         stdout_log = []
@@ -49,8 +45,7 @@ class AutoCompleter:
         self.RETURN_KEY_CODE = b'\r'
         
     def clearScreen(self):
-        if AUTO_CLEAR_SCREEN:
-            os.system('cls' if self.os_type == 'win32' else 'clear')
+        os.system('cls' if self.os_type == 'win32' else 'clear')
         
     def initializeInputMethod(self):
         try:  # for Windows
@@ -171,12 +166,11 @@ class AutoCompleter:
                         word_cache = last_word  # save previous input
                         self.replaceLastWord(candidates[0])
                         auto_completed = True
+            
             stdout_log.start()
             self.clearScreen()
             stdout_log.stop()
             print(self.sentence)
-        
-        
         return self.sentence
 
 
