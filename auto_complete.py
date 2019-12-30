@@ -4,7 +4,6 @@ import sys
 __autor__ = 'srbill1996'
 
 AUTO_CLEAR_SCREEN = True
-PRESERVE_STDOUT = True
 
 class RedirectStdout():
     stdout = sys.stdout
