@@ -3,37 +3,40 @@ import sys
 
 __autor__ = 'srbill1996'
 
+
 class RedirectStdout():
     stdout = sys.stdout
     stdout_log = []
+
     def start(self):
         sys.stdout = self
-    
+
     def stop(self):
         sys.stdout = self.stdout
         print("".join([i for i in self.stdout_log]))
         stdout_log = []
-    
+
     def write(self, text):
         self.stdout_log.append(text)
-        
+
+
 stdout_log = RedirectStdout()
-stdout_log.start() #start to buffer the content of the standard output
+stdout_log.start()  # start to buffer the content of the standard output
+
 
 def iamdictionary():
     word_list = []
     with open("popular_words.txt", "r", encoding='utf-8') as file:
         for e in file.read().split(' '):
             word_list.append(e)
-    if __name__ == '__main__': 
+    if __name__ == '__main__':
         print(f"Loaded {len(word_list)} words.")
     return word_list
-        
 
-        
+
 class AutoCompleter:
     def __init__(self, dictionary):
-        stdout_log.stop() 
+        stdout_log.stop()
         self.sentence = ''
         self.min_autocomplete = 2
         self.default_encode = 'utf-8'
@@ -43,19 +46,21 @@ class AutoCompleter:
         self.TAB_KEY_CODE = b'\t'
         self.SPACE_KEY_CODE = b' '
         self.RETURN_KEY_CODE = b'\r'
-        
+
     def clearScreen(self):
         os.system('cls' if self.os_type == 'win32' else 'clear')
-        
+
     def initializeInputMethod(self):
         try:  # for Windows
             import msvcrt
+
             def _get_key():
                 return msvcrt.getwch()
         except ImportError:  # Linux
             import tty
             import sys
             import termios
+
             def _get_key():
                 fd = sys.stdin.fileno()
                 old_settings = termios.tcgetattr(fd)
@@ -104,26 +109,26 @@ class AutoCompleter:
     def decodeChar(self, char):
         return char
 
-    def downgradeWord(self, word): # simplify word
+    def downgradeWord(self, word):  # simplify word
         symbols = {
-            'í':'i',
-            'á':'a',
-            'é':'e',
-            'ó':'o',
-            'ú':'u',
+            'í': 'i',
+            'á': 'a',
+            'é': 'e',
+            'ó': 'o',
+            'ú': 'u',
         }
         for s in symbols:
             word = word.replace(s, symbols[s])
         # return word.lower()
         return word
-    
+
     def findWord(self, word_to_find):
         coincidendeces = []
         word_to_find = self.downgradeWord(word_to_find)
         for word in self.word_list:
             if(self.downgradeWord(word).find(word_to_find) == 0
-                and len(word_to_find) > self.min_autocomplete):
-                    coincidendeces.append(word)
+                    and len(word_to_find) > self.min_autocomplete):
+                coincidendeces.append(word)
         return coincidendeces
 
     def __call__(self):
@@ -166,7 +171,7 @@ class AutoCompleter:
                         word_cache = last_word  # save previous input
                         self.replaceLastWord(candidates[0])
                         auto_completed = True
-            
+
             stdout_log.start()
             self.clearScreen()
             stdout_log.stop()
