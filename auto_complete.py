@@ -19,18 +19,13 @@ class RedirectStdout():
     def write(self, text):
         self.stdout_log.append(text)
 
-
-stdout_log = RedirectStdout()
-stdout_log.start()  # start to buffer the content of the standard output
-
-
-def iamdictionary():
+def loadWordsFile(file_name):
     word_list = []
-    with open("popular_words.txt", "r", encoding='utf-8') as file:
+    with open(file_name, 'r', encoding='utf-8') as file:
         for e in file.read().split(' '):
             word_list.append(e)
     if __name__ == '__main__':
-        print(f"Loaded {len(word_list)} words.")
+        print(f'Loaded {len(word_list)} words.')
     return word_list
 
 
@@ -177,9 +172,13 @@ class AutoCompleter:
             stdout_log.stop()
             print(self.sentence)
         return self.sentence
-
+    
+#Prepare and start buffer and std output redirection
+stdout_log = RedirectStdout()
+stdout_log.start() 
 
 if __name__ == '__main__':
-    getUserInput = AutoCompleter(dictionary=iamdictionary())
+    word_list = loadWordsFile('popular_words.txt')
+    getUserInput = AutoCompleter(dictionary=word_list)
     completed = getUserInput()
     print("Final sentence:", completed)
